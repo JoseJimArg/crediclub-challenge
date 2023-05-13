@@ -1,9 +1,9 @@
 import os
 import pandas as pd
 
-from database import SessionLocal
-from schemas import PaymentCreateSchema
-from utils import create_payment
+from database.database import SessionLocal
+from schemas.payment_schemas import PaymentCreateSchema
+from database.db_utils import create_payment
 
 def get_db():
     try:

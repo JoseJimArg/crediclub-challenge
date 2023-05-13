@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 import pandas as pd
 
-from models import Payment
-from schemas import PaymentCreateSchema
-from database import SessionLocal
+from models.payment_models import Payment
+from schemas.payment_schemas import PaymentCreateSchema
+from database.database import SessionLocal
 
 
 # Data base Dependency
