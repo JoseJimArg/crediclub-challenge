@@ -11,7 +11,7 @@ def get_payment(db: Session, payment_id: int):
 
 def create_payment(db: Session, payment: PaymentCreateSchema):
     db_payment = Payment(
-        date_payment=payment.date_payment,
+        payment_date=payment.payment_date,
         amount=payment.amount,
         bank=payment.bank,
         customer_name=payment.customer_name
