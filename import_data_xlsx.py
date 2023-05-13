@@ -3,7 +3,8 @@ import pandas as pd
 
 from database.database import SessionLocal
 from schemas.payment_schemas import PaymentCreateSchema
-from database.db_utils import create_payment
+from database.db_utils import create_payment, check_payment
+
 
 def get_db():
     try:
@@ -26,19 +27,28 @@ def validate_data(row):
             return
     raise ValueError('There is an error on the values')
 
+def if_payment_exists(payment: PaymentCreateSchema, db):
+    payment_db = check_payment(db, payment)
+    if payment_db:
+        raise ValueError('This row allready exists')
+    return False
+
 def create_new_registers(file_path, db: SessionLocal, rows_added: int):
     file_dataframe = pd.read_excel(file_path)
 
     for row in file_dataframe.itertuples():
         try:
-            # Validate data types of content and missing values
-            validate_data(row)
             excel_payment = PaymentCreateSchema(
                 payment_date=row.Fecha.date(),
                 amount=row.Monto,
                 bank=row.Proveedor,
                 customer_name=row.Cliente
             )
+            # Check if the file allready exists in the database
+            if_payment_exists(excel_payment, db)
+            # Validate data types of content and missing values
+            validate_data(row)
+            # Once the data is valid, writ the payment in the db
             create_payment(db=db, payment=excel_payment)
             # Incremet the counter for rows added when everithing finish whit success
             rows_added+=1

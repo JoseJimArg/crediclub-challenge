@@ -79,7 +79,8 @@ async def read_payment(payment_id: int, db: Session = Depends(db_utils.get_db)):
 @app.post("/payments/", response_model=PaymentSchema)
 def write_payment(payment: PaymentCreateSchema, db: Session = Depends(db_utils.get_db)):
     # TO-DO Validates if the value exists
-    # code here
+    if db_utils.check_payment(db=db, payment=payment):
+        raise HTTPException(status_code=409, detail="Register allready exists")
     # Compare all the data and look if there are allready in the data base
     # This is because we don't have a identifier from the request
     return db_utils.create_payment(db=db, payment=payment)

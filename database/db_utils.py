@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
 import pandas as pd
+from sqlalchemy.orm import Session
+from datetime import date
 
 from models.payment_models import Payment
 from schemas.payment_schemas import PaymentCreateSchema
@@ -21,6 +22,14 @@ def get_payments(db: Session, skip: int = 0, limit: int = 100):
 
 def get_payment(db: Session, payment_id: int):
     return db.query(Payment).filter(Payment.id == payment_id).first()
+
+def check_payment(db: Session, payment: PaymentCreateSchema):
+    return db.query(Payment).filter(
+        Payment.payment_date == payment.payment_date,
+        Payment.amount == payment.amount,
+        Payment.bank == payment.bank,
+        Payment.customer_name == payment.customer_name
+    ).first()
 
 def create_payment(db: Session, payment: PaymentCreateSchema):
     db_payment = Payment(
