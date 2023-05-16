@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
-
 from datetime import date
+
+from schemas import schema_examples
 
 
 # Payment schemas
@@ -16,23 +16,13 @@ class PaymentCreateSchema(PaymentBaseSchema):
 class PaymentCustomerSchema(PaymentBaseSchema):
     customer: str
 
+    class Config:
+        schema_extra = schema_examples.example_payment_customer_eschema
+
 class PaymentSchema(PaymentBaseSchema):
     id: int
     customer_id: int
 
     class Config:
         orm_mode = True
-
-# Customer schemas
-class CustomerBaseSchema(BaseModel):
-    first_name = str
-    last_name = str
-
-class CustomerCreateSchema(CustomerBaseSchema):
-    pass
-
-class CustomerSchema(CustomerBaseSchema):
-    id: int
-
-    class Config:
-        orm_mode = True
+        schema_extra = schema_examples.example_payment_eschema

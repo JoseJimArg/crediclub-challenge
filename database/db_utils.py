@@ -23,7 +23,7 @@ def get_payments(db: Session, skip: int = 0, limit: int = 100):
 def get_payment(db: Session, payment_id: int):
     return db.query(Payment).filter(Payment.id == payment_id).first()
 
-def check_payment(db: Session, payment: PaymentCreateSchema, customer_id: int):
+def find_payment(db: Session, payment: PaymentCreateSchema, customer_id: int):
     return db.query(Payment).filter(
         Payment.payment_date == payment.payment_date,
         Payment.amount == payment.amount,
@@ -31,17 +31,25 @@ def check_payment(db: Session, payment: PaymentCreateSchema, customer_id: int):
         Payment.customer_id == customer_id
     ).first()
 
+def is_payment_data_valid(payment: PaymentCreateSchema):
+    # The others values are covered by the Schemas
+    if payment.amount > 0 and payment.bank != "":
+        return True
+    return False
+
 def create_payment(db: Session, payment: PaymentCreateSchema, customer_id: int):
-    db_payment = Payment(
-        payment_date=payment.payment_date,
-        amount=payment.amount,
-        bank=payment.bank,
-        customer_id=customer_id
-    )
-    db.add(db_payment)
-    db.commit()
-    db.refresh(db_payment)
-    return db_payment
+    if is_payment_data_valid(payment):
+        db_payment = Payment(
+            payment_date=payment.payment_date,
+            amount=payment.amount,
+            bank=payment.bank,
+            customer_id=customer_id
+        )
+        db.add(db_payment)
+        db.commit()
+        db.refresh(db_payment)
+        return db_payment
+    return ValueError("The Payment bank is empty or the amount is not valid")
 
 def generate_payments_data_frame(payments):
     payments_content = {
@@ -63,9 +71,15 @@ def generate_payments_data_frame(payments):
     return payments_dataframe
 
 def get_or_create_customer_by_full_name(db: Session, customer_fullname: str):
+    # The customer_fullname cant be empty
+    if customer_fullname == "":
+        return ValueError("The Customer name is empty")
     # If there is not allready a customer with that fullname, it must be created.
-    incoming_first_name = customer_fullname.split(sep=" ")[0]
-    incoming_last_name = customer_fullname.split(sep=" ")[1]
+    try:
+        incoming_first_name = customer_fullname.split(sep=" ")[0]
+        incoming_last_name = customer_fullname.split(sep=" ")[1]
+    except:
+        return ValueError("There is no last_name")
     # Finds customer in the database
     actual_customer_db = db.query(Customer).filter(
         Customer.first_name == incoming_first_name,

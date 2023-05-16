@@ -1,39 +1,62 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-import pandas as pd
-from io import BytesIO
+from fastapi.openapi.models import Contact
 
+from sqlalchemy.orm import Session
+from io import BytesIO
 from schemas.payment_schemas import PaymentSchema, PaymentCustomerSchema
+
+import pandas as pd
 import database.db_utils as db_utils
 
 
 # Initialize the app
-app = FastAPI()
+app = FastAPI(
+    title = "CrediClub Technical Test API",
+    description = "API for interact with Payments, Customers an Banks.",
+    contact = Contact(
+        name = "Jose de Jesus Jimenez Arguelles",
+        email = "jose.jimenez.dev@gmail.com"
+    )
+)
 
 # Default / message
 @app.get("/")
-def read_root():
+def get_root():
+    """
+    # Hello!
+    """
     return {"Hello": "Crediclub!!!"}
 
 @app.get("/payments/", response_model=list[PaymentSchema])
-async def read_payments(skip: int = 0, 
+async def get_payments(skip: int = 0, 
                         limit: int = 100, 
                         db: Session = Depends(db_utils.get_db)):
     """
-    Returns: List of payments.
+    ## Parameters
+        - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.
+        - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.
+
+    ## Returns
+        - json list of Payments with the customer specified by id.
+            - The id number is assingned by the back end when a Customer is registered.
     """
 
     payments = db_utils.get_payments(db, skip=skip, limit=limit)
     return payments
 
 @app.get("/payments/customers", response_model=list[PaymentCustomerSchema])
-async def read_payments_whit_customers_name(skip: int = 0, 
+async def get_payments_whit_customers_name(skip: int = 0, 
                         limit: int = 100, 
                         db: Session = Depends(db_utils.get_db)):
     """
-    Returns:
-      List of payments whit Customer name insted of Customer id.
+    ## Parameters
+        - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.
+        - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.
+
+    ## Returns
+        - json list of Payments with the customer specified by **full name**. 
+            - Full name consist of "first_name" + " " + "last_name".
 
     """
     
@@ -52,11 +75,16 @@ async def read_payments_whit_customers_name(skip: int = 0,
     return payments_whit_clients
 
 @app.get("/payments/download_csv", response_class=StreamingResponse)
-async def read_payments_csv(skip: int = 0, 
+async def get_payments_in_csv(skip: int = 0, 
                             limit: int = 100, 
                             db: Session = Depends(db_utils.get_db)):
     """
-    Returns: File .csv whit a list of Payments.
+    ## Parameters
+        - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.
+        - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.
+
+    ## Returns 
+    - File .csv whit a list of Payments.
 
     Includes Spanish headers:
         - Fecha
@@ -64,7 +92,7 @@ async def read_payments_csv(skip: int = 0,
         - Monto
         - Provedor
 
-    The "Cliente" value is first_name + " " + last_name
+    The "Cliente" column is first_name + " " + last_name
     """
 
     payments = db_utils.get_payments(db, skip=skip, limit=limit)
@@ -79,11 +107,16 @@ async def read_payments_csv(skip: int = 0,
     return response
 
 @app.get("/payments/download_xlsx", response_class=StreamingResponse)
-async def read_payments_csv(skip: int = 0, 
+async def get_payments_excel_file(skip: int = 0, 
                             limit: int = 100, 
                             db: Session = Depends(db_utils.get_db)):
     """
-    Returns: File Excel file (.xlsx) whit a list of Payments.
+    ## Parameters
+        - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.
+        - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.
+
+    ## Returns 
+    - Excel file (xlsx) whit a list of Payments.
 
     Includes Spanish headers:
         - Fecha
@@ -91,7 +124,7 @@ async def read_payments_csv(skip: int = 0,
         - Monto
         - Provedor
 
-    The "Cliente" value is first_name + " " + last_name
+    The "Cliente" column is first_name + " " + last_name
     """
     payments = db_utils.get_payments(db, skip=skip, limit=limit)
     # generate the file from the DataFrame
@@ -119,11 +152,17 @@ async def read_payments_csv(skip: int = 0,
     return response
 
 @app.get("/payments/total")
-async def read_payments_total(skip: int = 0, 
+async def get_total_payments(skip: int = 0, 
                               limit: int = None, 
                               db: Session = Depends(db_utils.get_db)):
     """
-    Returns: float number whit the total amount of the Payments.
+    ## Parameters
+        - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.
+        - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.
+
+    ## Returns 
+    - json response with the total amount of the sum of all payments.
+    - It can be limited by the request parameters.
     """
 
     payments = db_utils.get_payments(db, skip=skip, limit=limit)
@@ -136,10 +175,14 @@ async def read_payments_total(skip: int = 0,
     return data
 
 @app.get("/payments/{payment_id}", response_model=PaymentSchema)
-async def read_payment(payment_id: int, 
+async def get_payment_by_id(payment_id: int, 
                        db: Session = Depends(db_utils.get_db)):
     """
-    Returns: Payment by his identifier (id).
+    ## Parameters
+        - payment_id: Integer who indentify a unique payment.
+
+    ## Returns 
+    - Payment information with the Customer identified by id.
     """
 
     db_payment = db_utils.get_payment(db=db, payment_id=payment_id)
@@ -148,15 +191,17 @@ async def read_payment(payment_id: int,
     return db_payment
 
 @app.post("/payments/", response_model=PaymentSchema)
-def write_payment_customer_name(payment: PaymentCustomerSchema, 
+def post_payment_with_customer_name(payment: PaymentCustomerSchema, 
                   db: Session = Depends(db_utils.get_db)):
     """
+    ## Summary
     Save a new record of Payment. Important, it takes the name of the customer
     instead of a identifier like an id. \n
     Checks if the customer allready exists, if is the case, only link the payment
     to the customer, otherwise, create a new customer whit the given name and link the payment.
 
-    Returns: a new Payment record with the customer id assigned.
+    ## Return
+        - success: New payment instance with the id assingned.
     """
 
     # Because we have customers and can not be payments whitout custmers
@@ -164,10 +209,16 @@ def write_payment_customer_name(payment: PaymentCustomerSchema,
     #  or link the new paymet whit an existing Customer.
     customer = db_utils.get_or_create_customer_by_full_name(
         db=db, customer_fullname=payment.customer
-    ) 
+    )
+    if isinstance(customer, ValueError):
+        raise HTTPException(status_code=400, detail=f"There was an error with the Customer name: {customer}")
     # Validates if the value exists
-    if db_utils.check_payment(db=db, payment=payment, customer_id=customer.id):
+    if db_utils.find_payment(db=db, payment=payment, customer_id=customer.id):
         raise HTTPException(status_code=409, detail="Register allready exists")
     # Compare all the data and look if there are allready in the data base
     # This is because we don't have a identifier from the request
-    return db_utils.create_payment(db=db, payment=payment, customer_id=customer.id)
+
+    db_payment = db_utils.create_payment(db=db, payment=payment, customer_id=customer.id)
+    if isinstance(db_payment, ValueError):
+        raise HTTPException(status_code=400, detail=f"There was an error: {db_payment}")
+    return db_payment
