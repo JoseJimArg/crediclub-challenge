@@ -1,0 +1,444 @@
+{
+	"openapi": "3.0.2",
+	"info": {
+		"title": "CrediClub Technical Test API",
+		"description": "API for interact with Payments, Customers an Banks.",
+		"contact": {
+			"name": "Jose de Jesus Jimenez Arguelles",
+			"email": "jose.jimenez.dev@gmail.com"
+		},
+		"version": "0.1.0"
+	},
+	"paths": {
+		"/": {
+			"get": {
+				"summary": "Get Root",
+				"description": "# Hello!",
+				"operationId": "get_root__get",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/": {
+			"get": {
+				"summary": "Get Payments",
+				"description": "## Parameters\n    - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.\n    - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.\n\n## Returns\n    - json list of Payments with the customer specified by id.\n        - The id number is assingned by the back end when a Customer is registered.",
+				"operationId": "get_payments_payments__get",
+				"parameters": [{
+					"required": false,
+					"schema": {
+						"title": "Skip",
+						"type": "integer",
+						"default": 0
+					},
+					"name": "skip",
+					"in": "query"
+				}, {
+					"required": false,
+					"schema": {
+						"title": "Limit",
+						"type": "integer",
+						"default": 100
+					},
+					"name": "limit",
+					"in": "query"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "Response Get Payments Payments  Get",
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/PaymentSchema"
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Post Payment With Customer Name",
+				"description": "## Summary\nSave a new record of Payment. Important, it takes the name of the customer\ninstead of a identifier like an id. \n\nChecks if the customer allready exists, if is the case, only link the payment\nto the customer, otherwise, create a new customer whit the given name and link the payment.\n\n## Return\n    - success: New payment instance with the id assingned.",
+				"operationId": "post_payment_with_customer_name_payments__post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PaymentCustomerSchema"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaymentSchema"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/customers": {
+			"get": {
+				"summary": "Get Payments Whit Customers Name",
+				"description": "## Parameters\n    - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.\n    - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.\n\n## Returns\n    - json list of Payments with the customer specified by **full name**. \n        - Full name consist of \"first_name\" + \" \" + \"last_name\".",
+				"operationId": "get_payments_whit_customers_name_payments_customers_get",
+				"parameters": [{
+					"required": false,
+					"schema": {
+						"title": "Skip",
+						"type": "integer",
+						"default": 0
+					},
+					"name": "skip",
+					"in": "query"
+				}, {
+					"required": false,
+					"schema": {
+						"title": "Limit",
+						"type": "integer",
+						"default": 100
+					},
+					"name": "limit",
+					"in": "query"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "Response Get Payments Whit Customers Name Payments Customers Get",
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/PaymentCustomerSchema"
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/download_csv": {
+			"get": {
+				"summary": "Get Payments In Csv",
+				"description": "## Parameters\n    - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.\n    - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.\n\n## Returns \n- File .csv whit a list of Payments.\n\nIncludes Spanish headers:\n    - Fecha\n    - Cliente\n    - Monto\n    - Provedor\n\nThe \"Cliente\" column is first_name + \" \" + last_name",
+				"operationId": "get_payments_in_csv_payments_download_csv_get",
+				"parameters": [{
+					"required": false,
+					"schema": {
+						"title": "Skip",
+						"type": "integer",
+						"default": 0
+					},
+					"name": "skip",
+					"in": "query"
+				}, {
+					"required": false,
+					"schema": {
+						"title": "Limit",
+						"type": "integer",
+						"default": 100
+					},
+					"name": "limit",
+					"in": "query"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response"
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/download_xlsx": {
+			"get": {
+				"summary": "Get Payments Excel File",
+				"description": "## Parameters\n    - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.\n    - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.\n\n## Returns \n- Excel file (xlsx) whit a list of Payments.\n\nIncludes Spanish headers:\n    - Fecha\n    - Cliente\n    - Monto\n    - Provedor\n\nThe \"Cliente\" column is first_name + \" \" + last_name",
+				"operationId": "get_payments_excel_file_payments_download_xlsx_get",
+				"parameters": [{
+					"required": false,
+					"schema": {
+						"title": "Skip",
+						"type": "integer",
+						"default": 0
+					},
+					"name": "skip",
+					"in": "query"
+				}, {
+					"required": false,
+					"schema": {
+						"title": "Limit",
+						"type": "integer",
+						"default": 100
+					},
+					"name": "limit",
+					"in": "query"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response"
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/total": {
+			"get": {
+				"summary": "Get Total Payments",
+				"description": "## Parameters\n    - skip: This parameter indicates the number of elements to skip or omit when performing an operation. The default value is 0, which means no elements will be skipped at the beginning.\n    - limit: This parameter sets the maximum limit of elements to be returned in an operation. The default value is 100, which means up to 100 elements will be returned at most.\n\n## Returns \n- json response with the total amount of the sum of all payments.\n- It can be limited by the request parameters.",
+				"operationId": "get_total_payments_payments_total_get",
+				"parameters": [{
+					"required": false,
+					"schema": {
+						"title": "Skip",
+						"type": "integer",
+						"default": 0
+					},
+					"name": "skip",
+					"in": "query"
+				}, {
+					"required": false,
+					"schema": {
+						"title": "Limit",
+						"type": "integer"
+					},
+					"name": "limit",
+					"in": "query"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payments/{payment_id}": {
+			"get": {
+				"summary": "Get Payment By Id",
+				"description": "## Parameters\n    - payment_id: Integer who indentify a unique payment.\n\n## Returns \n- Payment information with the Customer identified by id.",
+				"operationId": "get_payment_by_id_payments__payment_id__get",
+				"parameters": [{
+					"required": true,
+					"schema": {
+						"title": "Payment Id",
+						"type": "integer"
+					},
+					"name": "payment_id",
+					"in": "path"
+				}],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaymentSchema"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HTTPValidationError"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"HTTPValidationError": {
+				"title": "HTTPValidationError",
+				"type": "object",
+				"properties": {
+					"detail": {
+						"title": "Detail",
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ValidationError"
+						}
+					}
+				}
+			},
+			"PaymentCustomerSchema": {
+				"title": "PaymentCustomerSchema",
+				"required": ["payment_date", "amount", "bank", "customer"],
+				"type": "object",
+				"properties": {
+					"payment_date": {
+						"title": "Payment Date",
+						"type": "string",
+						"format": "date"
+					},
+					"amount": {
+						"title": "Amount",
+						"type": "number"
+					},
+					"bank": {
+						"title": "Bank",
+						"type": "string"
+					},
+					"customer": {
+						"title": "Customer",
+						"type": "string"
+					}
+				},
+				"example": {
+					"payment_date": "2023-01-01",
+					"amount": 1000,
+					"bank": "Bank name",
+					"customer": "First_name Last_name"
+				}
+			},
+			"PaymentSchema": {
+				"title": "PaymentSchema",
+				"required": ["payment_date", "amount", "bank", "id", "customer_id"],
+				"type": "object",
+				"properties": {
+					"payment_date": {
+						"title": "Payment Date",
+						"type": "string",
+						"format": "date"
+					},
+					"amount": {
+						"title": "Amount",
+						"type": "number"
+					},
+					"bank": {
+						"title": "Bank",
+						"type": "string"
+					},
+					"id": {
+						"title": "Id",
+						"type": "integer"
+					},
+					"customer_id": {
+						"title": "Customer Id",
+						"type": "integer"
+					}
+				},
+				"example": {
+					"payment_date": "2023-01-01",
+					"amount": 1000,
+					"bank": "Bank name",
+					"customer_id": 1
+				}
+			},
+			"ValidationError": {
+				"title": "ValidationError",
+				"required": ["loc", "msg", "type"],
+				"type": "object",
+				"properties": {
+					"loc": {
+						"title": "Location",
+						"type": "array",
+						"items": {
+							"anyOf": [{
+								"type": "string"
+							}, {
+								"type": "integer"
+							}]
+						}
+					},
+					"msg": {
+						"title": "Message",
+						"type": "string"
+					},
+					"type": {
+						"title": "Error Type",
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
+}
