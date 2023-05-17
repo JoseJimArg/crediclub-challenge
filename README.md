@@ -26,6 +26,9 @@ The `.env` file must be created in the root of the project for it to be read. On
 ### Configure the database
 The `database/database.py` file contains the configured URL for the database. The URL should be taken from the `.env` file using the variable name `DATABASE_URL`.
 
+This an example for a PostgrSQL database.
+`DATABASE_URL=postgresql://user:password@localhost/db_name`
+
 You can use any SQL-compatible database of your choice as long as it is compatible with `sqlalchemy`. Visit https://docs.sqlalchemy.org/en/20/ for more information.
 
 ## Usage
@@ -41,6 +44,8 @@ python migrate_db.py
 ```
 
 ### Import data from xlsx files
+The files taken by the script must be in `excel_files` directory. If you dont have it, it shoul be created.
+
 ```bash
 python import_data_xlsx.py
 ```
